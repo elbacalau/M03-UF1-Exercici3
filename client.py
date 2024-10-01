@@ -1,5 +1,5 @@
 from validaciones import validar_nom_cognom, validar_telefon, validar_quantitat_diners
-from compte import Compte, Fixe, Estalvi
+from compte import Fixe, Estalvi
 
 
 class Client:
@@ -11,11 +11,11 @@ class Client:
         cognom = input("Cognom: ")
         telefon = input("Telefon: ")
         quantitatDiners = input("Quantitat Diners: ")
-        tipusConte = input("Tipus de compte (fixe/estalvi): ")
-
-        # validacions
+        tipusConte = input("Tipus de compte (fixe/estalvi): ").lower()
+        
+        
         if not validar_nom_cognom(nom, cognom):
-            print("Nom i cognom han de contenir només lletres.")
+            print("Ha de contenir només lletres.")
             return
         
         if not validar_telefon(telefon):
@@ -28,14 +28,19 @@ class Client:
 
         quantitatDiners = float(quantitatDiners) 
         
+        compte = None
         if tipusConte == "fixe":
-            compte = Fixe(saldo=quantitatDiners, plaç=12, interes=5.0, client={"nom": nom, "cognom": cognom})
+            plaç = int(input("Plaç (només per comptes fixos): "))
+            interes = float(input("Interes (només per comptes fixos): "))  
+            
+            compte = Fixe(saldo=quantitatDiners, plaç=plaç, interes=interes, client={"nom": nom, "cognom": cognom})
+        
         elif tipusConte == "estalvi":
             compte = Estalvi(saldo=quantitatDiners, client={"nom": nom, "cognom": cognom})
+        
         else:
             print("Tipus de compte no vàlid.")
             return
-        
         
         client = {
             "nom": nom,
@@ -45,7 +50,7 @@ class Client:
         }
         
         self.clients.append(client)
-        print(f"Client {nom} afegit correctament.")
+        print(f"Client {nom} afegit correctament amb un compte {tipusConte}.")
 
     def llistarClients(self):
         if not self.clients:
@@ -53,45 +58,41 @@ class Client:
             return
         for client in self.clients:
             print(f"{client['nom']} {client['cognom']}")
-            
-            # compte = Fixe() 
             client['compte'].imprimirDadesCompte()
     
     def mostrarQuantitatPlaçFix(self):
         nom = input("Introdueix el nom del client: ")
         
-        
         if not nom.isalpha():
             print("Nom ha de contenir només lletres.")
             return
 
-        
         for client in self.clients:
             if client.get("nom").lower() == nom.lower():
                 compte = client.get("compte")
                 if isinstance(compte, Fixe):
-                    quant = compte.obternirImport()
-                    print(f"El client {nom} té {quant} € en el plaç fix.")
+                    compte.mostrarInformacio()
                 else:
-                    print("El client no té una compte fixe.")
+                    print(f"El client {client['nom']} no té una compte fixe.")
                 return
         
         print("No s'ha trobat el client.")
 
     def buscarClient(self):
-        nom = input("Introdueix el nom del client: ")
+        nom = input("Introdueix el nom del client: ").lower()
+        
         for client in self.clients:
-            if client.get("nom").lower() == nom.lower():
-                r = Compte(client.get("compte").saldo, client)
-                r.imprimirDadesCompte()
+            if client.get("nom").lower() == nom:
+                client['compte'].imprimirDadesCompte()
                 return
         print("No s'ha trobat el client")
 
     def eliminarClient(self):
-        nom = input("Introdueix el nom del client: ")
+        nom = input("Introdueix el nom del client: ").lower()
+        
         for client in self.clients:
-            if client.get("nom").lower() == nom.lower():
+            if client.get("nom").lower() == nom:
                 self.clients.remove(client)
-                print(f"Client {nom} eliminat correctament.\n")
+                print(f"Client {client['nom']} eliminat correctament.\n")
                 return
         print("No s'ha trobat el client.\n")
